@@ -1,0 +1,90 @@
+{
+  "total_queries": 5,
+  "results": [
+    {
+      "query_id": 1,
+      "query": "Explain the ReAct pattern in multi-agent systems. What are its key components?",
+      "routing": "theory",
+      "agents_used": [
+        "theory"
+      ],
+      "tools_used": [],
+      "memory_read": [],
+      "memory_write": [
+        "conversation_history",
+        "previous_questions"
+      ],
+      "quality": "N/A",
+      "time": "N/A",
+      "errors": []
+    },
+    {
+      "query_id": 2,
+      "query": "Design a scalable microservices architecture for a real-time chat application.",
+      "routing": "design",
+      "agents_used": [
+        "design"
+      ],
+      "tools_used": [],
+      "memory_read": [],
+      "memory_write": [
+        "conversation_history",
+        "previous_questions"
+      ],
+      "quality": "N/A",
+      "time": "N/A",
+      "errors": []
+    },
+    {
+      "query_id": 3,
+      "query": "Write Python code to implement an LRU Cache with O(1) lookup, insert, and delete",
+      "routing": "code",
+      "agents_used": [
+        "code"
+      ],
+      "tools_used": [],
+      "memory_read": [],
+      "memory_write": [
+        "conversation_history",
+        "previous_questions"
+      ],
+      "quality": "N/A",
+      "time": "N/A",
+      "errors": []
+    },
+    {
+      "query_id": 4,
+      "query": "Create a 3-week learning plan to master LangChain and LangGraph for building AI ",
+      "routing": "planning",
+      "agents_used": [
+        "plan"
+      ],
+      "tools_used": [],
+      "memory_read": [],
+      "memory_write": [
+        "conversation_history",
+        "previous_questions"
+      ],
+      "quality": "N/A",
+      "time": "N/A",
+      "errors": []
+    },
+    {
+      "query_id": 5,
+      "query": "What is ReAct? (First query to populate memory)",
+      "routing": "theory",
+      "agents_used": [
+        "theory"
+      ],
+      "tools_used": [],
+      "memory_read": [],
+      "memory_write": [
+        "conversation_history",
+        "previous_questions"
+      ],
+      "quality": "N/A",
+      "time": "N/A",
+      "errors": []
+    }
+  ]
+}
