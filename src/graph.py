@@ -88,38 +88,3 @@ def build_graph():
     
     print(" Graph built with 6 nodes and conditional routing")
     return graph.compile()
-
-
-if __name__ == "__main__":
-    # ВИЗУАЛИЗАЦИЯ
-    print("\n" + "="*80)
-    print("VISUALIZING SYSTEM ARCHITECTURE")
-    print("="*80)
-    
-    try:
-        graph = build_graph()
-        
-        # Используй draw_mermaid() - это правильный метод!
-        print("\nGenerating Mermaid code...")
-        mermaid_code = graph.get_graph().draw_mermaid()
-        
-        # Сохраняем в файл
-        with open("lab2_architecture.mmd", "w") as f:
-            f.write(mermaid_code)
-        
-        # Выводим в консоль
-        print("\n" + "="*80)
-        print("MERMAID DIAGRAM:")
-        print("="*80)
-        print(mermaid_code)
-        print("="*80)
-        
-        print("\n Saved to: lab2_architecture.mmd")
-        print("\n To convert to PNG:")
-        print("   Visit: https://mermaid.live/")
-        print("   Paste the code above and download")
-        
-    except Exception as e:
-        print(f"Error: {e}")
-        import traceback
-        traceback.print_exc()
