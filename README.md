@@ -31,6 +31,9 @@ This system implements a **router-specialists architecture** where:
 
 ---
 
+<img width="988" height="644" alt="Graph" src="https://github.com/user-attachments/assets/aac3294c-338a-42c0-899a-2ea66f71ae60" />
+
+
 ## 🚀 Quick Start
 
 ### 1. Installation
