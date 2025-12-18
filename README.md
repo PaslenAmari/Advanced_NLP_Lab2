@@ -2,6 +2,8 @@
 
 **Lab 2: Designing and Implementing a Multi-Agent System with LangChain + LangGraph**
 
+*By Siraeva Gulnara, ITMO student*
+
 A production-ready multi-agent system that classifies and routes user queries to specialized AI agents, demonstrating MAS patterns, ReAct reasoning, and LangGraph orchestration.
 
 ---
