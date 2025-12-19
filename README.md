@@ -35,6 +35,339 @@ This system implements a **router-specialists architecture** where:
 
 <img width="988" height="644" alt="Graph" src="https://github.com/user-attachments/assets/aac3294c-338a-42c0-899a-2ea66f71ae60" />
 
+The ouput:
+================================================================================
+MULTI-AGENT SYSTEM EVALUATION
+================================================================================
+
+Running 5 test queries...
+
+
+>>> QUERY 1: [THEORY]
+
+================================================================================
+QUERY: Explain the ReAct pattern in multi-agent systems. What are its key components?
+================================================================================
+Building LangGraph...
+ Graph built with 6 nodes and conditional routing
+
+[ROUTER] Analyzing query with ReAct...
+[LLM] Connecting to http://a6k2.dgx:34000/v1 with model qwen3-30b-vl
+  THOUGHT: Analyzing: 'Explain the ReAct pattern in multi-agent systems. What are i'
+OK: Parsed QueryClassification successfully
+  OBSERVATION: Type=theory, Complexity=medium
+  Route:
+
+[THEORY] Explaining concept...
+[LLM] Connecting to http://a6k2.dgx:34000/v1 with model qwen3-30b-vl
+[RETRY 1] ValidationError
+OK: Parsed TheoryExplanation successfully
+
+[SYNTHESIZER] Creating final answer...
+
+================================================================================
+EXECUTION SUMMARY
+================================================================================
+
+Query Type: theory
+Agent Path:
+
+ReAct Chain (3 steps):
+
+ReAct Chain (3 steps):
+
+  1. THOUGHT: Analyzing: 'Explain the ReAct pattern in multi-agent systems. What are i'
+     ACTION:  Route to theory
+     OBSERV:  Path:
+
+  2. THOUGHT: Explaining: ReAct Pattern in Multi-Agent Systems
+     ACTION:  Generate theory explanation with 5 concepts
+     OBSERV:  Confidence: 85.0%
+
+  3. THOUGHT: Combining all agent outputs
+     ACTION:  Synthesize final answer
+     OBSERV:  Created comprehensive response from 1 agent outputs
+
+
+Agent Outputs:
+  - theory: topic='ReAct Pattern in Multi-Agent Systems' explanation='The ReAct (Reasoning and Acting) pattern i...
+
+
+Final Answer:
+The ReAct (Reasoning and Acting) pattern is a framework used in multi-agent systems to enable agents 
+to perform complex tasks by interleaving reasoning and action. Instead of following a rigid sequence 
+of steps, agents use reasoning to determine the best course of action and then act accordingly, repeating this cycle as needed.
+
+Examples:
+- Planning a route in a navigation system
+- Solving a puzzle with multiple steps
+- Coordinating actions in a robotic team
+
+Execution Log: OK: Router -> OK: Theory -> OK: Synthesizer
+================================================================================
+
+================================================================================
+USER RESPONSE
+================================================================================
+Question: Explain the ReAct pattern in multi-agent systems. What are its key components?
+Answer: The ReAct (Reasoning and Acting) pattern is a framework used in multi-agent systems to enable agents to perform complex tasks by interleaving reasoning and action. Instead of following a rigid sequence of steps, agents use reasoning to determine the best course of action and then act accordingly, repeating this cycle as needed.
+
+Examples:
+- Planning a route in a navigation system
+- Solving a puzzle with multiple steps
+- Coordinating actions in a robotic team
+================================================================================
+
+>>> QUERY 2: [DESIGN]
+
+================================================================================
+QUERY: Design a scalable microservices architecture for a real-time chat application.
+================================================================================
+Building LangGraph...
+ Graph built with 6 nodes and conditional routing
+
+[ROUTER] Analyzing query with ReAct...
+[LLM] Connecting to http://a6k2.dgx:34000/v1 with model qwen3-30b-vl
+  THOUGHT: Analyzing: 'Design a scalable microservices architecture for a real-time'
+OK: Parsed QueryClassification successfully
+  OBSERVATION: Type=design, Complexity=complex
+  Route: architect -> system_designer
+
+[DESIGN] Analyzing architecture...
+[LLM] Connecting to http://a6k2.dgx:34000/v1 with model qwen3-30b-vl
+[RETRY 1] ValidationError
+OK: Parsed DesignAdvice successfully
+
+[SYNTHESIZER] Creating final answer...
+
+================================================================================
+EXECUTION SUMMARY
+================================================================================
+
+Query Type: design
+Agent Path: architect -> system_designer
+
+ReAct Chain (3 steps):
+
+ReAct Chain (3 steps):
+
+  1. THOUGHT: Analyzing: 'Design a scalable microservices architecture for a real-time'
+     ACTION:  Route to design
+     OBSERV:  Path: architect -> system_designer
+
+  2. THOUGHT: Analyzing design patterns
+     ACTION:  Generate architecture advice (10 patterns)
+     OBSERV:  Patterns: Microservices, Event-Driven Architecture, Pub/Sub
+
+  3. THOUGHT: Combining all agent outputs
+     ACTION:  Synthesize final answer
+     OBSERV:  Created comprehensive response from 1 agent outputs
+
+
+Agent Outputs:
+  - design: design_patterns=['Microservices', 'Event-Driven Architecture', 'Pub/Sub (Publish-Subscribe)', 'CQRS ...
+
+
+Final Answer:
+Adopt a microservices architecture with event-driven communication using a message broker to ensure loose coupling and scalability.
+
+Recommended Design Patterns:
+- Microservices
+- Event-Driven Architecture
+- Pub/Sub (Publish-Subscribe)
+- CQRS (Command Query Responsibility Segregation)
+- Saga Pattern
+- API Gateway
+- Service Discovery
+- Circuit Breaker
+- Retry Pattern
+- Message Queue
+
+Execution Log: OK: Router -> OK: Design -> OK: Synthesizer
+================================================================================
+
+================================================================================
+USER RESPONSE
+================================================================================
+Question: Design a scalable microservices architecture for a real-time chat application.
+Answer: Adopt a microservices architecture with event-driven communication using a message broker to 
+ensure loose coupling and scalability.
+
+Recommended Design Patterns:
+- Microservices
+- Event-Driven Architecture
+- Pub/Sub (Publish-Subscribe)
+- CQRS (Command Query Responsibility Segregation)
+- Saga Pattern
+- API Gateway
+- Service Discovery
+- Circuit Breaker
+- Retry Pattern
+- Message Queue
+================================================================================
+
+>>> QUERY 3: [CODE]
+
+================================================================================
+QUERY: Write Python code to implement an LRU Cache with O(1) lookup, insert, and delete.
+================================================================================
+Building LangGraph...
+ Graph built with 6 nodes and conditional routing
+
+[ROUTER] Analyzing query with ReAct...
+[LLM] Connecting to http://a6k2.dgx:34000/v1 with model qwen3-30b-vl
+  THOUGHT: Analyzing: 'Write Python code to implement an LRU Cache with O(1) lookup'
+OK: Parsed QueryClassification successfully
+  OBSERVATION: Type=code, Complexity=medium
+  Route: code_writer
+
+[CODE] Generating solution...
+[LLM] Connecting to http://a6k2.dgx:34000/v1 with model qwen3-30b-vl
+[RETRY 1] ValidationError
+OK: Parsed CodeSolution successfully
+
+[SYNTHESIZER] Creating final answer...
+
+================================================================================
+EXECUTION SUMMARY
+================================================================================
+
+Query Type: code
+Agent Path: code_writer
+
+ReAct Chain (3 steps):
+
+ReAct Chain (3 steps):
+
+  1. THOUGHT: Analyzing: 'Write Python code to implement an LRU Cache with O(1) lookup'
+     ACTION:  Route to code
+     OBSERV:  Path: code_writer
+
+  2. THOUGHT: Solving: Implement an LRU (Least Recently Used) Cache that
+     ACTION:  Generate code solution with 2 test cases
+     OBSERV:  Complexity: O(1)
+
+  3. THOUGHT: Combining all agent outputs
+     ACTION:  Synthesize final answer
+     OBSERV:  Created comprehensive response from 1 agent outputs
+
+
+Agent Outputs:
+  - code: problem='Implement an LRU (Least Recently Used) Cache that supports O(1) lookup, insert, and delete ...
+
+
+Final Answer:
+To achieve O(1) time complexity for get and put operations, we use a combination of a doubly linked list and a hash map. The doubly linked list maintains the order of usage, with the most recently used 
+item at the head and the least recently used at the tail. The hash map provides O(1) access to the nodes in the linked list. When a key is accessed (get or put), the corresponding node is moved to the head. When the cache exceeds its capacity, the node at the tail is removed.
+
+```python
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.cache = {}
+        self.head = Node(0, 0)
+        self.tail = Node(0, 0)
+        self.head.next = self.tail
+        self.tail.prev = self.head
+
+    def get(self, key: int) -> int:
+        if key in self.cache:
+            node = self.cache[key]
+            self._remove(node)
+            self._add(node)
+            return node.value
+        return -1
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.cache:
+            self._remove(self.cache[key])
+        node = Node(key, value)
+        self._add(node)
+        self.cache[key] = node
+        if len(self.cache) > self.capacity:
+            node_to_remove = self.tail.prev
+            self._remove(node_to_remove)
+            del self.cache[node_to_remove.key]
+
+    def _add(self, node):
+        node.prev = self.head
+        node.next = self.head.next
+        self.head.next.prev = node
+        self.head.next = node
+
+    def _remove(self, node):
+        prev_node = node.prev
+        next_node = node.next
+        prev_node.next = next_node
+        next_node.prev = prev_node
+
+class Node:
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+        self.prev = None
+        self.next = None
+```
+
+Execution Log: OK: Router -> OK: Code -> OK: Synthesizer
+================================================================================
+
+================================================================================
+USER RESPONSE
+================================================================================
+Question: Write Python code to implement an LRU Cache with O(1) lookup, insert, and delete.
+Answer: To achieve O(1) time complexity for get and put operations, we use a combination of a doubly 
+linked list and a hash map. The doubly linked list maintains the order of usage, with the most recently used item at the head and the least recently used at the tail. The hash map provides O(1) access to the nodes in the linked list. When a key is accessed (get or put), the corresponding node is moved 
+to the head. When the cache exceeds its capacity, the node at the tail is removed.
+
+```python
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.cache = {}
+        self.head = Node(0, 0)
+        self.tail = Node(0, 0)
+        self.head.next = self.tail
+        self.tail.prev = self.head
+
+    def get(self, key: int) -> int:
+        if key in self.cache:
+            node = self.cache[key]
+            self._remove(node)
+            self._add(node)
+            return node.value
+        return -1
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.cache:
+            self._remove(self.cache[key])
+        node = Node(key, value)
+        self._add(node)
+        self.cache[key] = node
+        if len(self.cache) > self.capacity:
+            node_to_remove = self.tail.prev
+            self._remove(node_to_remove)
+            del self.cache[node_to_remove.key]
+
+    def _add(self, node):
+        node.prev = self.head
+        node.next = self.head.next
+        self.head.next.prev = node
+        self.head.next = node
+
+    def _remove(self, node):
+        prev_node = node.prev
+        next_node = node.next
+        prev_node.next = next_node
+        next_node.prev = prev_node
+
+class Node:
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+        self.prev = None
+        self.next = None
+```
 
 ## 🚀 Quick Start
 
