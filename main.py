@@ -196,6 +196,10 @@ def run_assistant(query: str, session_id: str = "default") -> Dict:
             if hasattr(output, '__dict__'):
                 print("  - {}: {}...".format(agent_name, str(output)[:100]))
     
+    if final_state.get("final_answer"):
+        print("\n\nFinal Answer:")
+        print(final_state["final_answer"].final_answer)
+    
     if final_state.get("errors"):
         print("\n\nErrors:")
         for error in final_state.get("errors", [])[:2]:
@@ -203,6 +207,15 @@ def run_assistant(query: str, session_id: str = "default") -> Dict:
     
     print("\nExecution Log: {}".format(" -> ".join(final_state.get("execution_log", []))))
     print("="*80)
+    
+    # User-friendly output
+    if final_state.get("final_answer"):
+        print("\n" + "="*80)
+        print("USER RESPONSE")
+        print("="*80)
+        print("Question: {}".format(query))
+        print("Answer: {}".format(final_state["final_answer"].final_answer))
+        print("="*80)
     
     return final_state
 

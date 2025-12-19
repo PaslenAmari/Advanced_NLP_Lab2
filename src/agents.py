@@ -301,17 +301,42 @@ def synthesizer_node(state: GraphState) -> Dict:
     print("\n[SYNTHESIZER] Creating final answer...")
     
     agent_outputs = state.get("agent_outputs", {})
-    outputs_summary = ", ".join(agent_outputs.keys()) if agent_outputs else "none"
     
-    # Format agent outputs for final answer
-    agent_chain = " → ".join(state['classification'].agent_path) if state.get('classification') else "unknown"
+    # Extract the actual content from agent outputs
+    final_answer_text = ""
+    
+    if "theory" in agent_outputs:
+        theory = agent_outputs["theory"]
+        final_answer_text = theory.explanation
+        if theory.examples:
+            final_answer_text += "\n\nExamples:\n" + "\n".join(f"- {ex}" for ex in theory.examples)
+    
+    elif "design" in agent_outputs:
+        design = agent_outputs["design"]
+        final_answer_text = design.architecture_recommendation
+        if design.design_patterns:
+            final_answer_text += "\n\nRecommended Design Patterns:\n" + "\n".join(f"- {pattern}" for pattern in design.design_patterns)
+    
+    elif "code" in agent_outputs:
+        code = agent_outputs["code"]
+        final_answer_text = code.solution_explanation + "\n\n```python\n" + code.code + "\n```"
+    
+    elif "planning" in agent_outputs:
+        plan = agent_outputs["planning"]
+        final_answer_text = f"Goal: {plan.goal}\n\nTimeline: {plan.timeline}\n\nSteps:"
+        for i, step in enumerate(plan.steps, 1):
+            step_desc = step.get("description", step.get("step", "Unknown step"))
+            final_answer_text += f"\n{i}. {step_desc}"
+    
+    else:
+        # Fallback if no specific agent output
+        outputs_summary = ", ".join(agent_outputs.keys()) if agent_outputs else "none"
+        agent_chain = " → ".join(state['classification'].agent_path) if state.get('classification') else "unknown"
+        final_answer_text = f"Processed query through: {agent_chain}. Available outputs: {outputs_summary}"
     
     final_answer = AgentResponse(
         react_thoughts=state["react_chain"],
-        final_answer="Processed by: {}. Agent outputs: {}".format(
-            agent_chain,
-            outputs_summary
-        ),
+        final_answer=final_answer_text,
         source_agent="synthesizer",
         used_tools=[]  
     )
@@ -334,9 +359,7 @@ def synthesizer_node(state: GraphState) -> Dict:
     react_thought = ReActThought(
         thought="Combining all agent outputs",
         action="Synthesize final answer",
-        observation="Agents: {} | Questions in session: {}".format(
-            outputs_summary, len(memory.conversation_history)
-        )
+        observation="Created comprehensive response from {} agent outputs".format(len(agent_outputs))
     )
     
     return {
