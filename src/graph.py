@@ -22,6 +22,7 @@ from .agents import (
     design_advisor_node,
     code_helper_node,
     planner_node,
+    memory_retriever_node,
     synthesizer_node,
     route_to_agents,
 )
@@ -55,6 +56,7 @@ def build_graph():
     
     # ========== ADD NODES ==========
     graph.add_node("router", router_node)
+    graph.add_node("memory_retriever", memory_retriever_node)
     graph.add_node("theory_explainer", theory_explainer_node)
     graph.add_node("design_advisor", design_advisor_node)
     graph.add_node("code_helper", code_helper_node)
@@ -71,11 +73,27 @@ def build_graph():
         "router",
         route_to_agents,
         {
+            "theory_explainer": "memory_retriever",
+            "design_advisor": "memory_retriever",
+            "code_helper": "memory_retriever",
+            "planner": "memory_retriever",
+            "synthesizer": "synthesizer",  # If no classification
+        }
+    )
+    
+    # After memory retrieval, route to the ACTUAL specialist
+    def route_after_memory(state: GraphState) -> str:
+        return route_to_agents(state)
+
+    graph.add_conditional_edges(
+        "memory_retriever",
+        route_after_memory,
+        {
             "theory_explainer": "theory_explainer",
             "design_advisor": "design_advisor",
             "code_helper": "code_helper",
             "planner": "planner",
-            "synthesizer": "synthesizer",  # If no classification
+            "synthesizer": "synthesizer",
         }
     )
     

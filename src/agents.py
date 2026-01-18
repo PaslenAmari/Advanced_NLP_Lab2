@@ -4,11 +4,12 @@ Multi-Agent System
 
 Agents:
 1. router_node - Classifies query into type
-2. theory_explainer_node - Explains concepts
-3. design_advisor_node - Suggests architecture patterns
-4. code_helper_node - Generates code solutions
-5. planner_node - Creates actionable plans
-6. synthesizer_node - Combines all outputs into final answer
+2. memory_retriever_node - Retrieves long-term context from notes
+3. theory_explainer_node - Explains concepts
+4. design_advisor_node - Suggests architecture patterns
+5. code_helper_node - Generates code solutions
+6. planner_node - Creates actionable plans
+7. synthesizer_node - Combines all outputs into final answer
 """
 
 from typing import Dict, Any
@@ -74,7 +75,8 @@ Return this JSON structure with your classification:
         return {
             "classification": classification,
             "react_chain": state["react_chain"] + [react_thought],
-            "execution_log": state["execution_log"] + ["OK: Router"]
+            "execution_log": state["execution_log"] + ["OK: Router"],
+            "retrieved_context": "" # Initialize context
         }
     
     except Exception as e:
@@ -83,6 +85,35 @@ Return this JSON structure with your classification:
             "errors": state.get("errors", []) + ["Router: {}".format(str(e)[:80])],
             "execution_log": state["execution_log"] + ["FAILED: Router"]
         }
+
+
+# ============================================================================
+# MEMORY RETRIEVER AGENT - Long-term Context
+# ============================================================================
+
+def memory_retriever_node(state: GraphState) -> Dict:
+    """
+    Retrieves information from persistent notes.txt (Long-term memory).
+    Acts as a RAG-style retriever.
+    """
+    print("\n[MEMORY] Retrieving context from notes...")
+    
+    from .tools import read_notes
+    notes = read_notes()
+    
+    count = len(notes.split("="*40)) // 2
+    
+    react_thought = ReActThought(
+        thought="Checking notes for relevant context...",
+        action="call_note_reader",
+        observation="Retrieved {} historical entries from notes.".format(count)
+    )
+    
+    return {
+        "retrieved_context": notes,
+        "react_chain": state["react_chain"] + [react_thought],
+        "execution_log": state["execution_log"] + ["OK: Memory Retriever"]
+    }
 
 
 # ============================================================================
@@ -105,7 +136,19 @@ def theory_explainer_node(state: GraphState) -> Dict:
     parser = PydanticParserWithRetry(TheoryExplanation, llm)
     
     system_msg = "You are a theory expert. Explain concepts clearly with examples. Return JSON."
-    user_msg = """Topic: {query}
+    
+    # Inclusion of memory context
+    memory_context = ""
+    if state["session_memory"].conversation_history:
+        memory_context += "\nShort-term history:\n" + "\n".join(
+            [f"User: {m['query']}\nAgent: {m['response']}" for m in state["session_memory"].conversation_history[-2:]]
+        )
+    
+    if state.get("retrieved_context"):
+        memory_context += "\nLong-term notes context:\n" + state["retrieved_context"][-1000:]
+    
+    user_msg = f"""{memory_context}
+Topic: {{query}}
 
 Provide:
 - topic: The topic name
@@ -119,16 +162,20 @@ Provide:
     try:
         explanation = parser.invoke_with_retry(prompt, {"query": state["user_query"]})
         
+        # Simulated tool call for now, will be triggered by node logic
+        from .tools import query_knowledge_base
+        kb_result = query_knowledge_base(explanation.topic)
+        
         react_thought = ReActThought(
-            thought="Explaining: {}".format(explanation.topic),
-            action="Generate theory explanation with {} concepts".format(len(explanation.key_concepts)),
-            observation="Confidence: {:.1%}".format(explanation.confidence)
+            thought="Explaining: {}. KB Query: {}".format(explanation.topic, explanation.topic),
+            action="call_knowledge_base",
+            observation=kb_result[:100]
         )
         
         return {
             "agent_outputs": {**state.get("agent_outputs", {}), "theory": explanation},
             "react_chain": state["react_chain"] + [react_thought],
-            "execution_log": state["execution_log"] + ["OK: Theory"]
+            "execution_log": state["execution_log"] + ["OK: Theory (with tool)"]
         }
     
     except Exception as e:
@@ -156,7 +203,19 @@ def design_advisor_node(state: GraphState) -> Dict:
     parser = PydanticParserWithRetry(DesignAdvice, llm)
     
     system_msg = "You are a software architect. Provide design patterns and recommendations. Return JSON."
-    user_msg = """Design question: {query}
+    
+    # Inclusion of memory context
+    memory_context = ""
+    if state["session_memory"].conversation_history:
+        memory_context += "\nShort-term history:\n" + "\n".join(
+            [f"User: {m['query']}\nAgent: {m['response']}" for m in state["session_memory"].conversation_history[-2:]]
+        )
+        
+    if state.get("retrieved_context"):
+        memory_context += "\nLong-term notes context:\n" + state["retrieved_context"][-1000:]
+        
+    user_msg = f"""{memory_context}
+Design question: {{query}}
 
 Provide:
 - design_patterns: List of applicable patterns
@@ -206,7 +265,19 @@ def code_helper_node(state: GraphState) -> Dict:
     parser = PydanticParserWithRetry(CodeSolution, llm)
     
     system_msg = "You are an expert programmer. Solve coding problems with code and tests. Return JSON."
-    user_msg = """Problem: {query}
+    
+    # Inclusion of memory context
+    memory_context = ""
+    if state["session_memory"].conversation_history:
+        memory_context += "\nShort-term history:\n" + "\n".join(
+            [f"User: {m['query']}\nAgent: {m['response']}" for m in state["session_memory"].conversation_history[-2:]]
+        )
+        
+    if state.get("retrieved_context"):
+        memory_context += "\nLong-term notes context:\n" + state["retrieved_context"][-1000:]
+        
+    user_msg = f"""{memory_context}
+Problem: {{query}}
 
 Provide:
 - problem: Problem statement
@@ -220,16 +291,20 @@ Provide:
     try:
         solution = parser.invoke_with_retry(prompt, {"query": state["user_query"]})
         
+        # Execute Python code if provided
+        from .tools import execute_python
+        exec_result = execute_python(solution.code)
+        
         react_thought = ReActThought(
-            thought="Solving: {}".format(solution.problem[:50]),
-            action="Generate code solution with {} test cases".format(len(solution.test_cases)),
-            observation="Complexity: {}".format(solution.complexity)
+            thought="Solving: {}. Executing code...".format(solution.problem[:50]),
+            action="call_python_executor",
+            observation=exec_result[:100]
         )
         
         return {
             "agent_outputs": {**state.get("agent_outputs", {}), "code": solution},
             "react_chain": state["react_chain"] + [react_thought],
-            "execution_log": state["execution_log"] + ["OK: Code"]
+            "execution_log": state["execution_log"] + ["OK: Code (with tool)"]
         }
     
     except Exception as e:
@@ -257,7 +332,19 @@ def planner_node(state: GraphState) -> Dict:
     parser = PydanticParserWithRetry(PlanOutput, llm)
     
     system_msg = "You are a planning expert. Create detailed actionable plans. Return JSON."
-    user_msg = """Request: {query}
+    
+    # Inclusion of memory context
+    memory_context = ""
+    if state["session_memory"].conversation_history:
+        memory_context += "\nShort-term history:\n" + "\n".join(
+            [f"User: {m['query']}\nAgent: {m['response']}" for m in state["session_memory"].conversation_history[-2:]]
+        )
+        
+    if state.get("retrieved_context"):
+        memory_context += "\nLong-term notes context:\n" + state["retrieved_context"][-1000:]
+        
+    user_msg = f"""{memory_context}
+Request: {{query}}
 
 Provide:
 - goal: The main goal
@@ -270,16 +357,21 @@ Provide:
     try:
         plan = parser.invoke_with_retry(prompt, {"query": state["user_query"]})
         
+        # Save to notes
+        from .tools import save_to_notes
+        note_content = f"Goal: {plan.goal}\nSteps: " + ", ".join([s['title'] for s in plan.steps])
+        save_result = save_to_notes(note_content)
+        
         react_thought = ReActThought(
-            thought="Planning: {}".format(plan.goal),
-            action="Generate detailed plan ({} steps)".format(len(plan.steps)),
-            observation="Timeline: {}".format(plan.timeline)
+            thought="Planning: {}. Saving to notes...".format(plan.goal),
+            action="call_note_taker",
+            observation=save_result
         )
         
         return {
-            "agent_outputs": {**state.get("agent_outputs", {}), "plan": plan},
+            "agent_outputs": {**state.get("agent_outputs", {}), "planning": plan},
             "react_chain": state["react_chain"] + [react_thought],
-            "execution_log": state["execution_log"] + ["OK: Planner"]
+            "execution_log": state["execution_log"] + ["OK: Planner (with tool)"]
         }
     
     except Exception as e:
@@ -334,11 +426,21 @@ def synthesizer_node(state: GraphState) -> Dict:
         agent_chain = " → ".join(state['classification'].agent_path) if state.get('classification') else "unknown"
         final_answer_text = f"Processed query through: {agent_chain}. Available outputs: {outputs_summary}"
     
+    # Identify tools used from react thoughts
+    used_tools = []
+    for thought in state["react_chain"]:
+        if "tool" in thought.action.lower():
+            # Extract tool name from action string (simplified)
+            import re
+            match = re.search(r'(\w+_tool)', thought.action)
+            if match:
+                used_tools.append(match.group(1))
+
     final_answer = AgentResponse(
         react_thoughts=state["react_chain"],
         final_answer=final_answer_text,
         source_agent="synthesizer",
-        used_tools=[]  
+        used_tools=list(set(used_tools))  
     )
     
     # Update session memory

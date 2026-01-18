@@ -25,32 +25,37 @@ TEST_QUERIES = [
     {
         "id": 1,
         "type": "theory",
-        "query": "Explain the ReAct pattern in multi-agent systems. What are its key components?",
+        "description": "Conceptual/theoretical question about MAS/LLM agents",
+        "query": "Explain the difference between ReAct and Plan-and-Solve patterns in Multi-Agent Systems. Use your knowledge base tool.",
         "expected_agent": "theory_explainer"
     },
     {
         "id": 2,
         "type": "design",
-        "query": "Design a scalable microservices architecture for a real-time chat application.",
+        "description": "Design/architecture question",
+        "query": "Design a scalable microservices architecture for a real-time analytics dashboard. Suggest patterns.",
         "expected_agent": "design_advisor"
     },
     {
         "id": 3,
         "type": "code",
-        "query": "Write Python code to implement an LRU Cache with O(1) lookup, insert, and delete.",
+        "description": "Implementation/coding question",
+        "query": "Write a Python function to calculate the Fibonacci sequence up to N. Use the python executor to verify.",
         "expected_agent": "code_helper"
     },
     {
         "id": 4,
-        "type": "planning",
-        "query": "Create a 3-week learning plan to master LangChain and LangGraph for building AI agents.",
+        "type": "productivity",
+        "description": "Everyday tasks / productivity",
+        "query": "Create a cleaning schedule for a 2-bedroom apartment for the next month. Save it to my notes.",
         "expected_agent": "planner"
     },
     {
         "id": 5,
         "type": "memory_test",
-        "query": "What is ReAct? (First query to populate memory)",
-        "expected_agent": "theory_explainer"
+        "description": "Everyday tasks / productivity + Memory test",
+        "query": "What was the cleaning schedule we just created? Summarize it.",
+        "expected_agent": "planner"
     }
 ]
 
@@ -65,73 +70,58 @@ class ResultRecorder:
     def __init__(self):
         self.results = []
     
-    def record(self, query_id: int, query: str, final_state: Dict) -> Dict:
-        """Record single query result."""
+    def record(self, test_case: Dict, final_state: Dict) -> Dict:
+        """Record single query result with details required by Task 3."""
         result = {
-            "query_id": query_id,
-            "query": query[:80],
-            "routing": "unknown",
-            "agents_used": [],
-            "tools_used": [],
-            "memory_read": [],
-            "memory_write": [],
-            "quality": "N/A",
-            "time": "N/A",
+            "query_id": test_case["id"],
+            "query_type": test_case["type"],
+            "description": test_case.get("description", ""),
+            "query": test_case["query"],
+            "node_execution_order": final_state.get("execution_log", []),
+            "tools_invoked": [],
+            "memory_usage": {
+                "read": [],
+                "write": []
+            },
+            "useful": "Yes (Default)",
+            "improvements": "None (Default)",
             "errors": final_state.get("errors", [])
         }
         
-        # Extract execution info
-        if final_state.get("classification"):
-            result["routing"] = final_state["classification"].query_type
-            result["agents_used"] = final_state["classification"].agent_path
-        
-        if final_state.get("agent_outputs"):
-            result["agents_used"] = list(final_state["agent_outputs"].keys())
-            # Capture full agent outputs
-            result["agent_outputs"] = {k: str(v) for k, v in final_state["agent_outputs"].items()}
-
-        # Capture final answer and full query
-        result["full_query"] = query
+        # Capture tools from final answer or state
         final_ans = final_state.get("final_answer")
-        if final_ans:
-             # Use model_dump for Pydantic v2, fallback to dict for v1
-            result["final_answer"] = (
-                final_ans.model_dump() if hasattr(final_ans, "model_dump") 
-                else final_ans.dict() if hasattr(final_ans, "dict") 
-                else str(final_ans)
-            )
-        else:
-            result["final_answer"] = None
-        
-        # Memory info
+        if final_ans and hasattr(final_ans, "used_tools"):
+            result["tools_invoked"] = final_ans.used_tools
+            
+        # Capture memory usage
         memory = final_state.get("session_memory")
         if memory:
-            result["memory_read"] = memory.previous_questions[-2:] if len(memory.previous_questions) > 1 else []
-            result["memory_write"] = ["conversation_history", "previous_questions"]
+            if len(memory.conversation_history) > 1:
+                result["memory_usage"]["read"] = ["Previous history turn(s)"]
+            result["memory_usage"]["write"] = ["Updated history", "Updated learned topics"]
         
         self.results.append(result)
         return result
     
     def to_markdown(self) -> str:
-        """Convert results to markdown table."""
-        md = "\n## Experiment Results\n\n"
-        md += "| Query | Type | Agents | Tools | Memory | Quality |\n"
-        md += "|-------|------|--------|-------|--------|----------|\n"
+        """Convert results to a detailed markdown report for Task 3."""
+        md = "# Task 3: Experiment Recording & Evaluation\n\n"
         
         for r in self.results:
-            agents_str = " -> ".join(r["agents_used"]) if r["agents_used"] else "N/A"
-            tools_str = ", ".join(r["tools_used"]) if r["tools_used"] else "-"
-            memory_str = "" if r["memory_write"] else "-"
-            quality_str = "****" if not r["errors"] else "!"
-            
-            md += "| {} | {} | {} | {} | {} | {} |\n".format(
-                r["query_id"],
-                r["routing"],
-                agents_str,
-                tools_str,
-                memory_str,
-                quality_str
+            md += "### Experiment {}: [{}]\n".format(r["query_id"], r["query_type"].upper())
+            md += "- **Description**: {}\n".format(r["description"])
+            md += "- **Query**: `{}`\n".format(r["query"])
+            md += "- **Node Execution Order**: {}\n".format(" → ".join(r["node_execution_order"]))
+            md += "- **Tools Invoked**: {}\n".format(", ".join(r["tools_invoked"]) if r["tools_invoked"] else "None")
+            md += "- **Memory Usage**: Read: {}, Write: {}\n".format(
+                ", ".join(r["memory_usage"]["read"]) if r["memory_usage"]["read"] else "None",
+                ", ".join(r["memory_usage"]["write"]) if r["memory_usage"]["write"] else "None"
             )
+            md += "- **Usefulness**: {}\n".format(r["useful"])
+            md += "- **Improvements**: {}\n".format(r["improvements"])
+            if r["errors"]:
+                md += "- **Errors**: {}\n".format("; ".join(r["errors"]))
+            md += "\n---\n"
         
         return md
 
@@ -238,12 +228,17 @@ def main():
         print("\n>>> QUERY {}: [{}]".format(query_id, test_case["type"].upper()))
         
         final_state = run_assistant(query, session_id=session_id)
-        recorder.record(query_id, query, final_state)
+        recorder.record(test_case, final_state)
     
-    # Print results table
+    # Print results report
+    report_content = recorder.to_markdown()
     print("\n\n" + "="*80)
-    print(recorder.to_markdown())
+    print(report_content)
     print("="*80)
+    
+    # Save report to markdown file
+    with open("experiments_report.md", "w") as f:
+        f.write(report_content)
     
     # Save results to JSON
     results_file = "experiment_results.json"

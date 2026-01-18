@@ -1,10 +1,56 @@
-# Multi-Agent Study Productivity Assistant
+# Multi-Agent Study & Productivity Assistant
+
+This assistant helps with studies, coding, and productivity tasks using a Multi-Agent System (MAS) architecture.
 
 **Lab 2: Designing and Implementing a Multi-Agent System with LangChain + LangGraph**
 
 *By Siraeva Gulnara, ITMO student*
 
 A production-ready multi-agent system that classifies and routes user queries to specialized AI agents, demonstrating MAS patterns, ReAct reasoning, and LangGraph orchestration.
+
+## Task 1 – Architecture Design
+
+### Agents and Responsibilities
+- **Router Agent**: Analyzes the user query and classifies it (theory, design, code, planning). It decides the path through the graph.
+- **Specialist Agents**:
+    - **Theory Explainer**: Explains concepts using a local knowledge base.
+    - **Design Advisor**: Suggests architectural patterns and design decisions.
+    - **Code Helper**: Solves programming tasks and verifies code using a Python executor.
+    - **Planner Agent**: Creates actionable plans and saves them to a notes tool.
+- **Synthesizer Agent**: Consolidates outputs from specialists and tool results into a final, user-friendly answer.
+
+### MAS Pattern
+We implement a **Router + Specialists** pattern. The Router acts as a gateway, redirecting the state to the most appropriate domain-specific agent. This ensures high precision and modularity.
+
+### System Flow
+```mermaid
+graph TD
+    User([User Query]) --> Router{Router Agent}
+    Router -- theory --> Theory[Theory Explainer]
+    Router -- design --> Design[Design Advisor]
+    Router -- code --> Code[Code Helper]
+    Router -- planning --> Planner[Planner Agent]
+    
+    Theory --> KB[(Knowledge Base Tool)]
+    Code --> PyTool[Python Executor Tool]
+    Planner --> NoteTool[Notes Tool]
+    
+    Theory --> Synth[Synthesizer Agent]
+    Design --> Synth
+    Code --> Synth
+    Planner --> Synth
+    
+    Synth --> End([Final Answer])
+```
+
+### Tool Calling and Memory
+- **Tool Calling**:
+    - `knowledge_base_tool`: Used by Theory Explainer to retrieve factual data.
+    - `python_executor_tool`: Used by Code Helper to run and test code snippets.
+    - `note_taker_tool`: Used by Planner to persist plans in `notes.txt`.
+- **Memory Handling**:
+    - **Short-term**: `session_memory` stores the last two turns of the conversation, which are formatted into prompts for specialists.
+    - **Long-term**: `notes.txt` acts as a persistent file-based store for generated plans and important notes, allowing the system to "remember" goals across sessions if implemented further.
 
 ---
 

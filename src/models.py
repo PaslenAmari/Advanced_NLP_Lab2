@@ -101,5 +101,6 @@ class GraphState(TypedDict, total=False):
     agent_outputs: Dict[str, Any]
     final_answer: Optional[AgentResponse]
     execution_log: List[str]
+    retrieved_context: str
     errors: List[str]
     retry_count: int
